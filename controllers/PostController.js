@@ -1,18 +1,18 @@
 const Post = require('../models/Post')
+const User = require("../models/User")
+
 
 const PostController = {
 
  //crear post   
- async create(req, res) {
+ async create(req, res, next) {
    try {
      const post = await Post.create(req.body)
      res.status(201).send(post)
    } catch (error) {
-     console.error(error)
-     res
-       .status(500)
-       .send({ message: 'Ha habido un problema al crear el post' })
-   }
+    error.origin = 'post'
+    next(error)
+  }
  },
 
  //actualizar post
@@ -103,6 +103,46 @@ const PostController = {
     }
   },
  
+  //like post
+  async like(req, res) {
+    try {
+      const post = await Post.findByIdAndUpdate(
+      req.params._id, 
+      { $push: { likes: req.user._id } },
+      { new: true })
+
+      await User.findByIdAndUpdate(req.user._id,
+        { $push: { wishList: req.params._id } 
+      })
+   
+      res.send(post)
+    } catch (error) {
+      console.error(error)
+      res.status(500).send({ message: "There was a problem with your request" })
+      }
+  },
+
+  // Endpoint para borrar un like de un post
+  async dislike(req, res) {
+  const { postId, userId } = req.params;
+
+  try {
+    // Encuentra el post y elimina el like del array
+    const post = await Post.findByIdAndUpdate(
+      postId,
+      { $pull: { likes: userId } },
+      { new: true } // Devuelve el documento actualizado
+    );
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    res.status(200).json({ message: 'Like removed successfully', post });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error', error });
+  }
+  }
 }
 
 module.exports = PostController

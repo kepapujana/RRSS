@@ -10,6 +10,8 @@ router.get('/', PostController.getAll)
 router.get('/username/:username', PostController.getPostByName)
 router.get('/id/:_id', PostController.getById)
 router.put('/comments/:_id', authentication, PostController.insertComment)
+router.put('/likes/:_id', authentication, PostController.like)
+router.delete('/dislikes/:_id', authentication, PostController.dislike)
 
 
 module.exports = router

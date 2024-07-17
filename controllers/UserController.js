@@ -6,17 +6,16 @@ const { jwt_secret } = require('../config/keys.js')
 
 const UserController = {
   //register
-  create(req, res) {
-    req.body.role = 'user'
-
-    const passwordEncripted = bcrypt.hashSync(req.body.password, 10)
-
-    User.create({ ...req.body, password: passwordEncripted })
-      .then((user) =>
-        res.status(201).send({ message: 'Usuario creado con éxito', user })
-      )
-      .catch((err) => console.error(err))
+  async register(req, res, next) {
+    try {
+      const user = await User.create({ ...req.body, role: 'user' })
+      res.status(201).send({ message: "Usuario registrado con éxito", user })
+    } catch (error) {
+      error.origin = 'usuario'
+      next(error)
+    }
   },
+
  
 
   //login
@@ -37,20 +36,21 @@ const UserController = {
     }
   },
  
-  // //logout
-  // async logout(req, res) {
-  //   try {
-  //     await User.findByIdAndUpdate(req.user._id, {
-  //       $pull: { tokens: req.headers.authorization },
-  //     })
-  //     res.send({ message: 'Desconectado con éxito' })
-  //   } catch (error) {
-  //     console.error(error)
-  //     res.status(500).send({
-  //       message: 'Hubo un problema al intentar desconectar al usuario',
-  //     })
-  //   }
-  // },
+  //logout
+  async logout(req, res) {
+   try {
+     await User.findByIdAndUpdate(req.user._id, {
+       $pull: { tokens: req.headers.authorization },
+     })
+     res.send({ message: 'Desconectado con éxito' })
+   } catch (error) {
+     console.error(error)
+     res.status(500).send({
+       message: 'Hubo un problema al intentar desconectar al usuario',
+     })
+   }
+  },
+
 
   //traer user info por id
   async getInfo(req, res) {
@@ -62,6 +62,7 @@ const UserController = {
           path: 'commentIds',
         },
       })
+      .populate("wishList")
 
       res.send(user)
     } catch (error) {
