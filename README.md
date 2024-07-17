@@ -30,6 +30,7 @@ npm run dev
 - [Javascript](https://developer.mozilla.org/es/docs/Web/JavaScript)
 - [Express](https://expressjs.com/)
 - [Node.js](https://nodejs.org/en)
+- [MongoDB](https://www.mongodb.com/)
 
 ## Soporte
 Si tienes algún problema o sugerencia, por favor abre un problema [aquí](https://github.com/kepapujana/RRSS/issues).
